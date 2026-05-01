@@ -1,0 +1,12 @@
+Classify the following audit issue into one category:
+(Security, Performance, Compliance, UI, Other)
+
+Return ONLY valid JSON:
+{
+  "category": "...",
+  "confidence": 0.0-1.0,
+  "reasoning": "..."
+}
+
+Audit Issue:
+{input}
