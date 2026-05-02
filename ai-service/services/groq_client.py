@@ -19,6 +19,8 @@ class GroqClient:
 
         self.model = "llama-3.3-70b-versatile"
 
+        self.response_times = []
+
     def generate(self, prompt, retries=3):
         for attempt in range(retries):
             try:
@@ -46,6 +48,11 @@ class GroqClient:
                 tokens = result.get("usage", {}).get("total_tokens", 0)
 
                 response_time = int((time.time() - start_time) * 1000)
+
+                self.response_times.append(response_time)
+                
+                if len(self.response_times) > 10:
+                    self.response_times.pop(0)
 
                 return {
                     "output": output,
