@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 from services.groq_client import GroqClient
 from services.cache_service import CacheService
 import json
+import uuid
+from datetime import datetime
 
 bp = Blueprint("categorise", __name__)
 
@@ -26,6 +28,9 @@ def categorise():
     cached = cache.get(text)
     if cached:
         return jsonify({
+            "request_id": str(uuid.uuid4()),
+            "timestamp": datetime.utcnow().isoformat(),
+            
             "data": cached,
             "meta": {
                 "cached": True
@@ -44,15 +49,20 @@ def categorise():
             "reasoning": result["output"]
         }
 
-    cache.set(text, parsed)
+    if parsed:
+        cache.set(text, parsed)
 
     return jsonify({
-        "data": parsed,
-        "meta": {
-            "cached": False,
-            "tokens_used": result["tokens_used"],
-            "response_time_ms": result["response_time_ms"],
-            "model": result["model"],
-            "fallback": result["fallback"]
-        }
-    })
+    "request_id": str(uuid.uuid4()),
+    "timestamp": datetime.utcnow().isoformat(),
+
+    "data": parsed,   # ✅ FIXED (not cached)
+
+    "meta": {
+        "cached": False,
+        "tokens_used": result["tokens_used"],
+        "response_time_ms": result["response_time_ms"],
+        "model": result["model"],
+        "fallback": result["fallback"]
+    }
+})
