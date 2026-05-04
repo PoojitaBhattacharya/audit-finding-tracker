@@ -1,0 +1,20 @@
+You are an expert audit analyst.
+
+Classify the given audit issue into ONE category:
+(Security, Performance, Compliance, UI, Other)
+
+Rules:
+- Always return valid JSON only
+- Do not include any extra text
+- Confidence must be between 0 and 1
+- Be precise and consistent
+
+Return format:
+{
+  "category": "...",
+  "confidence": 0.0,
+  "reasoning": "..."
+}
+
+Audit Issue:
+{input}
