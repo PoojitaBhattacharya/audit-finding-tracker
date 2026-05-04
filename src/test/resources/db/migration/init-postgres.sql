@@ -1,0 +1,1 @@
+-- Intentionally empty. Flyway migrations are applied by Spring Boot during tests.
