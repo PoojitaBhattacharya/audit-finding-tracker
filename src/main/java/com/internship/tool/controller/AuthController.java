@@ -1,49 +1,34 @@
 package com.internship.tool.controller;
 
+import com.internship.tool.dto.AuthResponse;
+import com.internship.tool.dto.LoginRequest;
+import com.internship.tool.dto.RegisterRequest;
+import com.internship.tool.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
-    // TEMP dummy login
+    private final AuthService authService;
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
-
-        String username = request.get("username");
-        String password = request.get("password");
-
-        if ("admin".equals(username) && "password".equals(password)) {
-            return ResponseEntity.ok(Map.of(
-                    "token", "dummy-jwt-token",
-                    "role", "ADMIN"
-            ));
-        }
-
-        return ResponseEntity.status(401).body("Invalid credentials");
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 
-    // TEMP register
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> request) {
-
-        return ResponseEntity.ok(Map.of(
-                "message", "User registered successfully",
-                "role", "VIEWER"
-        ));
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(authService.register(request));
     }
 
-    // TEMP refresh
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh() {
-
-        return ResponseEntity.ok(Map.of(
-                "token", "new-dummy-token"
-        ));
+    public ResponseEntity<AuthResponse> refresh(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        return ResponseEntity.ok(authService.refresh(token));
     }
 }

@@ -1,5 +1,6 @@
 package com.internship.tool.service.impl;
 
+import com.internship.tool.dto.DashboardStatsDto;
 import com.internship.tool.entity.AuditFinding;
 import com.internship.tool.repository.AuditFindingRepository;
 import com.internship.tool.service.AuditFindingService;
@@ -10,8 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AuditFindingServiceImpl implements AuditFindingService {
@@ -21,63 +22,33 @@ public class AuditFindingServiceImpl implements AuditFindingService {
 
     @Override
     public AuditFinding createFinding(AuditFinding finding) {
-        finding.setStatus("OPEN"); // default status
+        if (finding.getStatus() == null) {
+            finding.setStatus("OPEN");
+        }
         return repository.save(finding);
     }
 
     @Override
     public Page<AuditFinding> getAllFindings(int page, int size, String sortBy, String sortDir) {
-        Pageable pageable = PageRequest.of(page, size, buildSort(sortBy, sortDir));
-        return repository.findAll(pageable);
+        Sort sort = Sort.by(sortBy);
+        if ("desc".equalsIgnoreCase(sortDir)) {
+            sort = sort.descending();
+        } else {
+            sort = sort.ascending();
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return repository.findByDeletedAtIsNull(pageable);
     }
 
     @Override
-    public String exportFindingsAsCsv(String sortBy, String sortDir) {
-        List<AuditFinding> findings = repository.findAll(buildSort(sortBy, sortDir));
-
-        String header = "id,title,description,severity,status,dueDate";
-        String rows = findings.stream()
-                .map(this::toCsvRow)
-                .collect(Collectors.joining("\n"));
-
-        if (rows.isEmpty()) {
-            return header + "\n";
-        }
-
-        return header + "\n" + rows + "\n";
-    }
-
-    private String toCsvRow(AuditFinding finding) {
-        return String.join(",",
-                asCsvValue(finding.getId()),
-                asCsvValue(finding.getTitle()),
-                asCsvValue(finding.getDescription()),
-                asCsvValue(finding.getSeverity()),
-                asCsvValue(finding.getStatus()),
-                asCsvValue(finding.getDueDate()));
-    }
-
-    private String asCsvValue(Object value) {
-        if (value == null) {
-            return "\"\"";
-        }
-
-        String text = String.valueOf(value).replace("\"", "\"\"");
-        return "\"" + text + "\"";
-    }
-
-    private Sort buildSort(String sortBy, String sortDir) {
-        Sort.Direction direction = "desc".equalsIgnoreCase(sortDir)
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
-
-        String safeSortBy = (sortBy == null || sortBy.isBlank()) ? "id" : sortBy;
-        return Sort.by(direction, safeSortBy);
+    public List<AuditFinding> getAllFindings() {
+        return repository.findAll();
     }
 
     @Override
     public AuditFinding getFindingById(Long id) {
-        return repository.findById(id)
+        return repository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new RuntimeException("Finding not found"));
     }
 
@@ -85,11 +56,21 @@ public class AuditFindingServiceImpl implements AuditFindingService {
     public AuditFinding updateFinding(Long id, AuditFinding updatedFinding) {
         AuditFinding existing = getFindingById(id);
 
-        existing.setTitle(updatedFinding.getTitle());
-        existing.setDescription(updatedFinding.getDescription());
-        existing.setSeverity(updatedFinding.getSeverity());
-        existing.setStatus(updatedFinding.getStatus());
-        existing.setDueDate(updatedFinding.getDueDate());
+        if (updatedFinding.getTitle() != null) {
+            existing.setTitle(updatedFinding.getTitle());
+        }
+        if (updatedFinding.getDescription() != null) {
+            existing.setDescription(updatedFinding.getDescription());
+        }
+        if (updatedFinding.getSeverity() != null) {
+            existing.setSeverity(updatedFinding.getSeverity());
+        }
+        if (updatedFinding.getStatus() != null) {
+            existing.setStatus(updatedFinding.getStatus());
+        }
+        if (updatedFinding.getDueDate() != null) {
+            existing.setDueDate(updatedFinding.getDueDate());
+        }
 
         return repository.save(existing);
     }
@@ -97,5 +78,78 @@ public class AuditFindingServiceImpl implements AuditFindingService {
     @Override
     public void deleteFinding(Long id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    public void softDeleteFinding(Long id) {
+        AuditFinding finding = getFindingById(id);
+        finding.setDeletedAt(LocalDateTime.now());
+        repository.save(finding);
+    }
+
+    @Override
+    public String exportFindingsAsCsv(String sortBy, String sortDir) {
+        Sort sort = Sort.by(sortBy);
+        if ("desc".equalsIgnoreCase(sortDir)) {
+            sort = sort.descending();
+        } else {
+            sort = sort.ascending();
+        }
+
+        List<AuditFinding> findings = repository.findAllByDeletedAtIsNull(sort);
+        StringBuilder csv = new StringBuilder();
+        csv.append("id,title,description,severity,status,dueDate\n");
+        for (AuditFinding finding : findings) {
+            csv.append(finding.getId()).append(',')
+                    .append(escapeCsv(finding.getTitle())).append(',')
+                    .append(escapeCsv(finding.getDescription())).append(',')
+                    .append(escapeCsv(finding.getSeverity())).append(',')
+                    .append(escapeCsv(finding.getStatus())).append(',')
+                    .append(finding.getDueDate() != null ? finding.getDueDate() : "")
+                    .append('\n');
+        }
+        return csv.toString();
+    }
+
+    private String escapeCsv(String value) {
+        if (value == null) {
+            return "";
+        }
+        String escaped = value.replace("\"", "\"\"");
+        if (escaped.contains(",") || escaped.contains("\n") || escaped.contains("\r") || escaped.contains("\"")) {
+            return '"' + escaped + '"';
+        }
+        return escaped;
+    }
+
+    @Override
+    public List<AuditFinding> getBySeverity(String severity) {
+        return repository.findBySeverityIgnoreCase(severity);
+    }
+
+    @Override
+    public List<AuditFinding> getByStatus(String status) {
+        return repository.findByStatusIgnoreCase(status);
+    }
+
+    @Override
+    public Page<AuditFinding> searchFindings(String query, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return repository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrSeverityContainingIgnoreCaseOrStatusContainingIgnoreCase(
+                query, pageable);
+    }
+
+    @Override
+    public DashboardStatsDto getDashboardStats() {
+        return DashboardStatsDto.builder()
+                .totalFindings(repository.countTotalFindings())
+                .openFindings(repository.countOpenFindings())
+                .closedFindings(repository.countClosedFindings())
+                .overdueFindings(repository.countOverdueFindings())
+                .criticalFindings(repository.countCriticalFindings())
+                .highFindings(repository.countHighFindings())
+                .mediumFindings(repository.countMediumFindings())
+                .lowFindings(repository.countLowFindings())
+                .build();
     }
 }

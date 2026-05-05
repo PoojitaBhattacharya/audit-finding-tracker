@@ -1,5 +1,6 @@
 package com.internship.tool.controller;
 
+import com.internship.tool.dto.DashboardStatsDto;
 import com.internship.tool.entity.AuditFinding;
 import com.internship.tool.service.AuditFindingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,9 +8,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/findings")
@@ -18,53 +21,81 @@ public class AuditFindingController {
     @Autowired
     private AuditFindingService service;
 
-    // Create
+    // Create - ADMIN and MANAGER can create
     @PostMapping
-    public AuditFinding create(@RequestBody AuditFinding finding) {
-        return service.createFinding(finding);
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    public ResponseEntity<AuditFinding> create(@RequestBody AuditFinding finding) {
+        AuditFinding created = service.createFinding(finding);
+        return ResponseEntity.ok(created);
     }
 
-    // Get All with pagination + sorting
+    // Get All with pagination + sorting - All authenticated users
     @GetMapping
-    public Page<AuditFinding> getAll(
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Page<AuditFinding>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
 
-        return service.getAllFindings(page, size, sortBy, sortDir);
+        Page<AuditFinding> results = service.getAllFindings(page, size, sortBy, sortDir);
+        return ResponseEntity.ok(results);
     }
 
-    // Export CSV
+    // Search findings - All authenticated users
+    @GetMapping("/search")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Page<AuditFinding>> search(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<AuditFinding> results = service.searchFindings(q, page, size);
+        return ResponseEntity.ok(results);
+    }
+
+    // Dashboard stats - ADMIN and MANAGER only
+    @GetMapping("/stats")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    public ResponseEntity<DashboardStatsDto> getStats() {
+        DashboardStatsDto stats = service.getDashboardStats();
+        return ResponseEntity.ok(stats);
+    }
+
+    // Export CSV - ADMIN and MANAGER only
     @GetMapping(value = "/export", produces = "text/csv")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<byte[]> exportCsv(
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
 
         String csvContent = service.exportFindingsAsCsv(sortBy, sortDir);
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=audit-findings.csv")
                 .contentType(MediaType.parseMediaType("text/csv"))
                 .body(csvContent.getBytes(StandardCharsets.UTF_8));
     }
 
-    // Get by ID
+    // Get by ID - All authenticated users
     @GetMapping("/{id}")
-    public AuditFinding getById(@PathVariable Long id) {
-        return service.getFindingById(id);
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<AuditFinding> getById(@PathVariable Long id) {
+        AuditFinding finding = service.getFindingById(id);
+        return ResponseEntity.ok(finding);
     }
 
-    // Update
+    // Update - ADMIN and MANAGER only
     @PutMapping("/{id}")
-    public AuditFinding update(@PathVariable Long id, @RequestBody AuditFinding finding) {
-        return service.updateFinding(id, finding);
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    public ResponseEntity<AuditFinding> update(@PathVariable Long id, @RequestBody AuditFinding finding) {
+        AuditFinding updated = service.updateFinding(id, finding);
+        return ResponseEntity.ok(updated);
     }
 
-    // Delete
+    // Soft Delete - ADMIN only
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable Long id) {
-        service.deleteFinding(id);
-        return "Deleted successfully";
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.softDeleteFinding(id);
+        return ResponseEntity.noContent().build();
     }
 }
