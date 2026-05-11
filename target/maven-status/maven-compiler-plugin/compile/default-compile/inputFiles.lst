@@ -5,6 +5,7 @@ C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\sr
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\controller\AuditFindingController.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\controller\AuthController.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\controller\GlobalExceptionHandler.java
+C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\controller\HomeController.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\dto\AiResponseDto.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\dto\AuthResponse.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\dto\DashboardStatsDto.java
@@ -21,6 +22,7 @@ C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\sr
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\scheduler\AuditFindingScheduler.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\security\JwtAuthenticationFilter.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\security\JwtProvider.java
+C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\security\OutputEncodingUtil.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\security\PiiMaskingFilter.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\service\AiServiceClient.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\service\AuditFindingService.java

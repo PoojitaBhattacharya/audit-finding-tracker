@@ -43,6 +43,17 @@ public class AuditFindingController {
     }
 
     // Search findings - All authenticated users
+    @GetMapping("/search")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Page<AuditFinding>> search(
+            @RequestParam(name = "q", defaultValue = "") String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Page<AuditFinding> results = service.searchFindings(query, page, size);
+        return ResponseEntity.ok(results);
+    }
+
     @PostMapping("/search")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<AuditFinding>> search(@RequestBody com.internship.tool.dto.SearchRequestDto request) {

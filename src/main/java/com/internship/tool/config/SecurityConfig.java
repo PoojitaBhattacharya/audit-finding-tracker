@@ -45,21 +45,17 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger", "/swagger/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(UNAUTHORIZED)))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(piiMaskingFilter, UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers
-                        // Prevent MIME type sniffing
-                        .contentTypeOptions(contentTypeOptions -> contentTypeOptions.disable())
-                        .xssProtection(xssProtection -> xssProtection.headerValue(
-                                org.springframework.security.web.header.writers.XXssProtectionHeaderWriter.HeaderValue.ONE_ENABLED_MODE_BLOCK
-                        ))
                         // Prevent clickjacking
                         .frameOptions(frameOptions -> frameOptions.deny())
                         // Strict Content Security Policy - no unsafe-inline, no unsafe-eval
@@ -81,15 +77,12 @@ public class SecurityConfig {
                         .referrerPolicy(referrer -> referrer.policy(
                                 org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN
                         ))
-                        // Permissions Policy (Feature Policy)
-                        .permissionsPolicy(permissions -> permissions.policy(
-                                "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
-                        ))
-                        .and()
-                        // Custom header for additional protection
+                        // Custom headers for additional protection
                         .addHeaderWriter(new org.springframework.security.web.header.writers.StaticHeadersWriter(
                                 "X-Content-Type-Options", "nosniff",
+                                "X-XSS-Protection", "1; mode=block",
                                 "X-Frame-Options", "DENY",
+                                "Permissions-Policy", "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()",
                                 "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0, private",
                                 "Pragma", "no-cache",
                                 "Expires", "0"
