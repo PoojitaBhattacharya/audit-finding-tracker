@@ -1,5 +1,6 @@
 import chromadb
 from sentence_transformers import SentenceTransformer
+import uuid
 
 class ChromaClient:
 
@@ -13,12 +14,35 @@ class ChromaClient:
         self.model = SentenceTransformer("all-MiniLM-L6-v2")
 
     def add_documents(self, docs):
-        embeddings = self.model.encode(docs).tolist()
+        chunked_docs = []
+        chunk_size = 500
+        overlap = 50
+        
+        for doc in docs:
+            start = 0
+            doc_len = len(doc)
+            
+            if doc_len == 0:
+                continue
+                
+            while start < doc_len:
+                end = min(start + chunk_size, doc_len)
+                chunked_docs.append(doc[start:end])
+                
+                if end == doc_len:
+                    break
+                    
+                start += (chunk_size - overlap)
 
-        ids = [str(i) for i in range(len(docs))]
+        if not chunked_docs:
+            return
+
+        embeddings = self.model.encode(chunked_docs).tolist()
+
+        ids = [str(uuid.uuid4()) for _ in range(len(chunked_docs))]
 
         self.collection.add(
-            documents=docs,
+            documents=chunked_docs,
             embeddings=embeddings,
             ids=ids
         )

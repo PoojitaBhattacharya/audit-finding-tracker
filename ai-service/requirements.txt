@@ -4,3 +4,6 @@ requests
 python-dotenv
 chromadb
 groq
+redis
+sentence-transformers
+pytest

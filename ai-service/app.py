@@ -2,6 +2,8 @@ from flask import Flask
 from routes.categorise import bp as categorise_bp
 from routes.query import bp as query_bp
 from routes.health import bp as health_bp
+from routes.describe import describe_bp
+from routes.report import report_bp
 from config import limiter
 
 app = Flask(__name__)
@@ -11,6 +13,8 @@ limiter.init_app(app)
 app.register_blueprint(categorise_bp)
 app.register_blueprint(query_bp)
 app.register_blueprint(health_bp)
+app.register_blueprint(describe_bp)
+app.register_blueprint(report_bp)
 
 @app.after_request
 def apply_security_headers(response):
