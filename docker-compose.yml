@@ -1,7 +1,8 @@
 version: '3.9'
 
 services:
-  db: # Changed from postgres to db to match your properties host
+  db:
+    # Changed from postgres to db to match your properties host
     image: postgres:15-alpine
     container_name: audit-tracker-postgres
     environment:
@@ -15,7 +16,7 @@ services:
     networks:
       - audit-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d audit_db"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d audit_db" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,7 +31,7 @@ services:
     networks:
       - audit-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -47,6 +48,7 @@ services:
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
       SERVER_PORT: 8081
+      AI_SERVICE_URL: http://host.docker.internal:5000
     ports:
       - "8081:8081" # This bypasses the 8080 conflict!
     depends_on:

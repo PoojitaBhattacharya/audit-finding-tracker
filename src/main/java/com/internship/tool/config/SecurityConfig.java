@@ -1,6 +1,7 @@
 package com.internship.tool.config;
 
 import com.internship.tool.security.JwtAuthenticationFilter;
+import com.internship.tool.security.PiiMaskingFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +26,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final PiiMaskingFilter piiMaskingFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -49,9 +51,11 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(UNAUTHORIZED)))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(piiMaskingFilter, UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers
                         .frameOptions(frameOptions -> frameOptions.deny())
-                        .contentSecurityPolicy(csp -> csp.policyDirectives("frame-ancestors 'none'; form-action 'self'"))
+                        .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; form-action 'self'"))
+                        .cacheControl(cache -> {})
                 );
 
         return http.build();

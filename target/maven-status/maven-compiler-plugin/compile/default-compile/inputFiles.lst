@@ -10,6 +10,7 @@ C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\sr
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\dto\LoginRequest.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\dto\PiiMaskingUtil.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\dto\RegisterRequest.java
+C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\dto\SearchRequestDto.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\entity\AuditFinding.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\entity\AuditLog.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\entity\User.java
@@ -19,6 +20,7 @@ C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\sr
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\scheduler\AuditFindingScheduler.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\security\JwtAuthenticationFilter.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\security\JwtProvider.java
+C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\security\PiiMaskingFilter.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\service\AiServiceClient.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\service\AuditFindingService.java
 C:\Users\College\Desktop\campuspe assignments\capstone\audit-finding-tracker2\src\main\java\com\internship\tool\service\AuditService.java

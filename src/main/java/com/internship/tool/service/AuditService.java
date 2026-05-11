@@ -37,8 +37,9 @@ public class AuditService {
         }
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<AuditFinding> results = auditFindingRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrSeverityContainingIgnoreCaseOrStatusContainingIgnoreCase(
-                q, pageable);
+        Page<AuditFinding> results = auditFindingRepository
+                .findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrSeverityContainingIgnoreCaseOrStatusContainingIgnoreCase(
+                        q, pageable);
 
         if (results.isEmpty() && q != null && !q.isBlank()) {
             return new org.springframework.data.domain.PageImpl<>(
@@ -64,6 +65,7 @@ public class AuditService {
     }
 
     private String toSummary(AuditFinding finding) {
-        return String.format("%d:%s:%s:%s", finding.getId(), finding.getTitle(), finding.getStatus(), finding.getDueDate());
+        return String.format("%d:%s:%s:%s", finding.getId(), finding.getTitle(), finding.getStatus(),
+                finding.getDueDate());
     }
 }

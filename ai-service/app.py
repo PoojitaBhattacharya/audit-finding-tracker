@@ -13,7 +13,9 @@ app.register_blueprint(health_bp)
 def apply_security_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'DENY'
-    response.headers['Content-Security-Policy'] = "frame-ancestors 'none'; form-action 'self';"
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; form-action 'self';"
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
     return response
 
 @app.route("/")
@@ -21,4 +23,4 @@ def home():
     return {"message": "AI Service Running"}
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

@@ -34,15 +34,9 @@ public class AuditController {
     }
 
     // SEARCH API
-    @GetMapping("/search")
-    public ResponseEntity<Page<Object>> searchAudit(
-            @RequestParam String q,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir) {
-
-        Page<Object> results = auditService.searchAudit(q, page, size, sortBy, sortDir);
+    @PostMapping("/search")
+    public ResponseEntity<Page<Object>> searchAudit(@RequestBody com.internship.tool.dto.SearchRequestDto request) {
+        Page<Object> results = auditService.searchAudit(request.getQ(), request.getPage(), request.getSize(), request.getSortBy(), request.getSortDir());
         return ResponseEntity.ok(results);
     }
 
