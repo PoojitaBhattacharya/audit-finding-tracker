@@ -10,7 +10,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 
+import java.sql.Types;
 import java.time.LocalDateTime;
 
 @Entity
@@ -33,9 +35,11 @@ public class AuditLog {
     @Column(nullable = false)
     private String action;
 
+    @JdbcTypeCode(Types.VARCHAR)
     @Column(name = "old_value", columnDefinition = "TEXT")
     private String oldValue;
 
+    @JdbcTypeCode(Types.VARCHAR)
     @Column(name = "new_value", columnDefinition = "TEXT")
     private String newValue;
 
