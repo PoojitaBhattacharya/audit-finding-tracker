@@ -1,0 +1,28 @@
+# Python cache files — no business inside a Docker image
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Test scripts — dev only, not production
+test_chroma.py
+test_client.py
+test_groq.py
+
+# Virtual environment (if ever created locally)
+venv/
+.venv/
+env/
+
+# Env files — injected via docker-compose
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# OS noise
+.DS_Store
+Thumbs.db

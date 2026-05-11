@@ -71,7 +71,7 @@ services:
       - audit-network
 
   nginx:
-    image: nginx:latest
+    image: nginx:alpine
     container_name: audit-tracker-nginx
     ports:
       - "80:80"

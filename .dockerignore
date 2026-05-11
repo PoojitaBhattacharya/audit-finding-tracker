@@ -1,0 +1,32 @@
+# Maven build output — already compiled locally, do NOT send to Docker
+target/
+
+# Git history — never needed in Docker
+.git
+.gitignore
+
+# IDE and editor files
+.vscode
+.idea
+*.iml
+
+# Maven wrapper files — not needed inside builder (uses system mvn)
+.mvn
+
+# Dev/test tooling
+postman/
+.postman/
+
+# Other service directories — not part of the backend build context
+frontend/
+backend/
+ai-service/
+
+# Env files — passed via docker-compose environment section
+.env
+.env.example
+
+# Docs & misc
+*.md
+security.md
+security_reviwer.md

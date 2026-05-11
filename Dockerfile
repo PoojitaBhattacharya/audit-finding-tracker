@@ -1,13 +1,16 @@
 FROM maven:3.9.6-eclipse-temurin-17 AS builder
 
 WORKDIR /build
+
+# Copy pom.xml first for dependency caching — only re-runs if pom.xml changes
 COPY pom.xml .
-RUN mvn dependency:go-offline
+RUN mvn dependency:go-offline -q
 
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTests -q
 
-FROM eclipse-temurin:17-jdk-alpine
+# Use JRE-only (not JDK) for the runtime — saves ~100 MB
+FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 COPY --from=builder /build/target/tool-0.0.1-SNAPSHOT.jar app.jar
