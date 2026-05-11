@@ -15,8 +15,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
@@ -52,7 +52,14 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger", "/swagger/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(UNAUTHORIZED)))
+                .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
+                    String accept = request.getHeader(HttpHeaders.ACCEPT);
+                    if (accept != null && accept.contains(MediaType.TEXT_HTML_VALUE)) {
+                        response.sendRedirect("/swagger");
+                    } else {
+                        response.setStatus(UNAUTHORIZED.value());
+                    }
+                }))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(piiMaskingFilter, UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers
