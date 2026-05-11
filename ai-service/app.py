@@ -9,6 +9,13 @@ app.register_blueprint(categorise_bp)
 app.register_blueprint(query_bp)
 app.register_blueprint(health_bp)
 
+@app.after_request
+def apply_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Content-Security-Policy'] = "frame-ancestors 'none'; form-action 'self';"
+    return response
+
 @app.route("/")
 def home():
     return {"message": "AI Service Running"}

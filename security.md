@@ -16,6 +16,9 @@ Following are the list of topics:
 - DAY 2. Tool-Specific Security Threats to this project
 - DAY 5. Week 1 Security testing results
 
+### WEEK 2
+- DAY 7, 8, & 12. OWASP ZAP Findings & Security Headers Remediations
+
 ---
 # DAY 1 
 
@@ -277,3 +280,30 @@ URL:http://127.0.0.1:5000/describe
 
 ## tests for checking request rate and report generation rate limits
 
+
+---
+---
+---
+
+# DAY 7, 8, & 12
+
+## 5. OWASP ZAP Findings & Security Headers Remediations
+
+### Objective
+Document the remediations applied to address findings identified by OWASP ZAP scans.
+
+### Missing Anti-clickjacking Header (X-Frame-Options)
+**ZAP Finding:**  
+The response does not include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options. This can allow a malicious site to frame the application, enabling clickjacking attacks.
+
+**Remediation:**  
+- Configured Spring Security to explicitly set `X-Frame-Options` to `DENY`.
+- This prevents the application from being framed by any site, effectively mitigating clickjacking risks.
+
+### Missing Anti-MIME-Sniffing Header (X-Content-Type-Options)
+**ZAP Finding:**  
+The Anti-MIME-Sniffing header `X-Content-Type-Options` is missing or not set to `nosniff`. This allows older browsers to sniff the MIME type of the response, potentially leading to cross-site scripting (XSS) or other content-sniffing attacks.
+
+**Remediation:**  
+- Ensured Spring Security explicitly configures `X-Content-Type-Options` to `nosniff`.
+- This instructs the browser to strictly follow the declared Content-Type, preventing MIME-type sniffing vulnerabilities.
