@@ -2,8 +2,11 @@ from flask import Flask
 from routes.categorise import bp as categorise_bp
 from routes.query import bp as query_bp
 from routes.health import bp as health_bp
+from config import limiter
 
 app = Flask(__name__)
+
+limiter.init_app(app)
 
 app.register_blueprint(categorise_bp)
 app.register_blueprint(query_bp)
