@@ -6,6 +6,8 @@ from routes.describe import describe_bp
 from routes.report import report_bp
 from config import limiter
 from services.sanitizer import sanitize_request
+from services.response_masker import ResponseMasker
+import json
 
 app = Flask(__name__)
 
@@ -22,11 +24,38 @@ app.before_request(sanitize_request)
 
 @app.after_request
 def apply_security_headers(response):
+    # Security Headers
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'DENY'
-    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; form-action 'self';"
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    
+    # Content Security Policy - no unsafe-inline or unsafe-eval
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self'; "
+        "style-src 'self'; "
+        "img-src 'self' data:; "
+        "font-src 'self'; "
+        "connect-src 'self'; "
+        "frame-ancestors 'none'; "
+        "form-action 'self'; "
+        "base-uri 'self'"
+    )
+    
+    # Cache Control for sensitive data
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    
+    # Mask PII in response body if it's JSON
+    if response.content_type and 'application/json' in response.content_type:
+        try:
+            response.data = ResponseMasker.mask_json_response(response.get_data(as_text=True)).encode('utf-8')
+        except Exception as e:
+            # Log error but don't break response
+            print(f"[WARNING] Failed to mask PII in response: {str(e)}")
+    
     return response
 
 @app.route("/")

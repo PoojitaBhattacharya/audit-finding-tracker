@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.http.HttpHeaders;
 
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
@@ -54,10 +55,48 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(piiMaskingFilter, UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers
+                        // Prevent MIME type sniffing
+                        .contentTypeOptions(contentTypeOptions -> contentTypeOptions.disable())
+                        .xssProtection(xssProtection -> xssProtection.headerValue(
+                                org.springframework.security.web.header.writers.XXssProtectionHeaderWriter.HeaderValue.ONE_ENABLED_MODE_BLOCK
+                        ))
+                        // Prevent clickjacking
                         .frameOptions(frameOptions -> frameOptions.deny())
-                        .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; form-action 'self'"))
-                        .cacheControl(cache -> {})
-                );
+                        // Strict Content Security Policy - no unsafe-inline, no unsafe-eval
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'self'; " +
+                                "script-src 'self'; " +
+                                "style-src 'self'; " +
+                                "img-src 'self' data:; " +
+                                "font-src 'self'; " +
+                                "connect-src 'self'; " +
+                                "frame-ancestors 'none'; " +
+                                "form-action 'self'; " +
+                                "base-uri 'self'; " +
+                                "object-src 'none'"
+                        ))
+                        // Cache control - prevent caching of sensitive data
+                        .cacheControl(cache -> cache.disable())
+                        // Referrer Policy
+                        .referrerPolicy(referrer -> referrer.policy(
+                                org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN
+                        ))
+                        // Permissions Policy (Feature Policy)
+                        .permissionsPolicy(permissions -> permissions.policy(
+                                "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
+                        ))
+                        .and()
+                        // Custom header for additional protection
+                        .addHeaderWriter(new org.springframework.security.web.header.writers.StaticHeadersWriter(
+                                "X-Content-Type-Options", "nosniff",
+                                "X-Frame-Options", "DENY",
+                                "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0, private",
+                                "Pragma", "no-cache",
+                                "Expires", "0"
+                        ))
+                )
+                // Cookie Security Configuration
+                .rememberMe(remember -> remember.disable());
 
         return http.build();
     }

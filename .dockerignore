@@ -1,32 +1,92 @@
-# Maven build output — already compiled locally, do NOT send to Docker
-target/
-
-# Git history — never needed in Docker
+# Version Control & Backup Files
 .git
 .gitignore
+.github
+.gitlab
+.hg
+.svn
+CVS
+*.swp
+*.swo
+*~
+*.bak
+*.backup
+*.orig
 
-# IDE and editor files
+# Environment & Configuration Files (SECURITY CRITICAL)
+.env
+.env.*
+.env.local
+.env.*.local
+.env.production.local
+.env.development.local
+.env.test.local
+
+# IDE and Editor Files
 .vscode
 .idea
 *.iml
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
 
-# Maven wrapper files — not needed inside builder (uses system mvn)
+# Build & Package Manager Cache
+target/
+dist/
+build/
+node_modules/
+.npm
+.yarn
+.gradle
+
+# Maven Files
 .mvn
+mvnw
+mvnw.cmd
 
-# Dev/test tooling
+# Testing & Coverage
+.coverage
+.pytest_cache
+__pycache__
+*.pyc
+test_*.py
+*_test.py
+
+# Development & Documentation
 postman/
 .postman/
-
-# Other service directories — not part of the backend build context
 frontend/
 backend/
 ai-service/
-
-# Env files — passed via docker-compose environment section
-.env
-.env.example
-
-# Docs & misc
 *.md
 security.md
 security_reviwer.md
+README.md
+LICENSE
+CONTRIBUTING.md
+
+# Logs & Temporary Files
+*.log
+logs/
+temp/
+tmp/
+*.tmp
+
+# Docker Files (don't include docker config in images)
+Dockerfile
+docker-compose.yml
+.dockerignore
+docker-compose.*.yml
+
+# OS Files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# Kubernetes & Orchestration (if used)
+k8s/
+helm/
+docker-stack.yml
