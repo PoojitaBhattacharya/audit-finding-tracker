@@ -5,6 +5,7 @@ from routes.health import bp as health_bp
 from routes.describe import describe_bp
 from routes.report import report_bp
 from config import limiter
+from services.sanitizer import sanitize_request
 
 app = Flask(__name__)
 
@@ -15,6 +16,9 @@ app.register_blueprint(query_bp)
 app.register_blueprint(health_bp)
 app.register_blueprint(describe_bp)
 app.register_blueprint(report_bp)
+
+# Wire input sanitization to run before every POST/PUT request
+app.before_request(sanitize_request)
 
 @app.after_request
 def apply_security_headers(response):
@@ -30,4 +34,4 @@ def home():
     return {"message": "AI Service Running"}
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)

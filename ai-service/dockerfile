@@ -6,10 +6,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Pre-download the sentence-transformers model at build time
-# so it is baked into the image and not re-downloaded on every cold start (~90MB)
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
-
 # Copy application source (after deps -- so source changes don't invalidate pip cache layer)
 COPY . .
 

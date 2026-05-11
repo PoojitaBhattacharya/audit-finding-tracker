@@ -7,12 +7,25 @@ from datetime import datetime
 
 bp = Blueprint("categorise", __name__)
 
-client = GroqClient()
-cache = CacheService()
+# Lazy-init: avoids crashing at import if GROQ_API_KEY is not yet set
+_client = None
+_cache = None
 
+def get_client():
+    global _client
+    if _client is None:
+        _client = GroqClient()
+    return _client
+
+def get_cache():
+    global _cache
+    if _cache is None:
+        _cache = CacheService()
+    return _cache
 
 def load_prompt(text):
-    with open("ai-service/prompts/categorise_prompt.txt", "r") as f:
+    # Path is relative to WORKDIR /app inside the container
+    with open("prompts/categorise_prompt.txt", "r") as f:
         return f.read().replace("{input}", text)
 
 
@@ -24,6 +37,8 @@ def categorise():
         return jsonify({"error": "Missing 'text' field"}), 400
 
     text = data["text"]
+    client = get_client()
+    cache = get_cache()
 
     cached = cache.get(text)
     if cached:

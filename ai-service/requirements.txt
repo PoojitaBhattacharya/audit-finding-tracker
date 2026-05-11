@@ -5,4 +5,4 @@ python-dotenv==1.0.1
 chromadb==0.5.3
 groq==0.9.0
 redis==5.0.8
-sentence-transformers==3.0.1
+# sentence-transformers removed — pulled torch + CUDA (~700MB); using chromadb's built-in ONNX embeddings instead

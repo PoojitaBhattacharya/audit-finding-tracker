@@ -1,5 +1,5 @@
 import chromadb
-from sentence_transformers import SentenceTransformer
+from chromadb.utils import embedding_functions
 import uuid
 
 class ChromaClient:
@@ -7,11 +7,15 @@ class ChromaClient:
     def __init__(self):
         self.client = chromadb.Client()
 
-        self.collection = self.client.get_or_create_collection(
-            name="audit_docs"
-        )
+        # Use chromadb's built-in ONNX-based embedding function (all-MiniLM-L6-v2)
+        # This is functionally equivalent to SentenceTransformer but runs via ONNX Runtime
+        # (CPU-only, ~50MB) instead of PyTorch + CUDA (~700MB+)
+        self.embed_fn = embedding_functions.DefaultEmbeddingFunction()
 
-        self.model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.collection = self.client.get_or_create_collection(
+            name="audit_docs",
+            embedding_function=self.embed_fn
+        )
 
     def add_documents(self, docs):
         chunked_docs = []
@@ -37,21 +41,18 @@ class ChromaClient:
         if not chunked_docs:
             return
 
-        embeddings = self.model.encode(chunked_docs).tolist()
-
+        # Embeddings are now handled automatically by the collection's embedding_function
         ids = [str(uuid.uuid4()) for _ in range(len(chunked_docs))]
 
         self.collection.add(
             documents=chunked_docs,
-            embeddings=embeddings,
             ids=ids
         )
 
     def query(self, text, n_results=3):
-        embedding = self.model.encode([text]).tolist()
-
+        # Embedding handled automatically by the collection
         results = self.collection.query(
-            query_embeddings=embedding,
+            query_texts=[text],
             n_results=n_results
         )
 

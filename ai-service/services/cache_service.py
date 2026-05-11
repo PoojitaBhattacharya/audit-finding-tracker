@@ -1,11 +1,15 @@
 import redis
 import hashlib
 import json
+import os
 
 class CacheService:
 
     def __init__(self):
-        self.client = redis.Redis(host='localhost', port=6379, decode_responses=True)
+        # In Docker, Redis is reachable via the service name 'redis', not 'localhost'
+        redis_host = os.getenv("REDIS_HOST", "localhost")
+        redis_port = int(os.getenv("REDIS_PORT", "6379"))
+        self.client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
         self.ttl = 900
 
         self.hits = 0
